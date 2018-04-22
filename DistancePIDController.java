@@ -55,6 +55,24 @@ public class DistancePIDController {
         }
     }
 
+    // Keep a set distance away from a wall to the right.
+    private static void pid3() {
+      float integral = 0;
+      float lastError = 0;
+      float derivative = 0;
+      float target = 0.20f;
+      int speed = 10; // This is a guess to be changed.
+      while (true) {
+        float value = sensor.getDistance();
+        float error = value - target;
+        integral = integral + error;
+        derivative = error - lastError;
+        float signal = Kp*error + Ki*integral + Kd*derivative;
+        setMotors(speed,(int) signal);
+        lastError = error;
+      }
+    }
+
     private static void setMotors(int speed) {
         if (speed >= 0) {
             leftMotor.setSpeed(speed);
@@ -67,6 +85,26 @@ public class DistancePIDController {
             leftMotor.backward();
             rightMotor.backward();
         }
+    }
+
+    private static void setMotorsTurn(int speed, int steer) {
+      // Correct for following a right hand side wall.
+      if (steer > 0) {
+        leftMotor.setSpeed(speed*steer);
+        rightMotor.setSpeed(speed*steer);
+        leftMotor.backward();
+        rightMotor.forward();
+      } else if (steer < 0) {
+        leftMotor.setSpeed(speed*(-steer));
+        rightMotor.setSpeed(speed*(-steer));
+        leftMotor.forward();
+        rightMotor.backward();
+      } else {
+        leftMotor.setSpeed(speed);
+        rightMotor.setSpeed(speed);
+        leftMotor.forward();
+        rightMotor.forward();
+      }
     }
 
     public static void main(String[] args) {
