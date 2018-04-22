@@ -24,6 +24,7 @@ public class DistancePIDController {
             derivative = error - lastError;
             float signal = Kp*error + Ki*integral + Kd*derivative;
             setMotors((int) signal);
+            lastError = error;
         }
     }
 
@@ -50,6 +51,7 @@ public class DistancePIDController {
             derivative = error - lastError;
             float signal = Kp*error + Ki*integral + Kd*derivative;
             setMotors((int) signal);
+            lastError = error;
         }
     }
 
