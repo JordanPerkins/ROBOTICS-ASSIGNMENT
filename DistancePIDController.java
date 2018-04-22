@@ -54,12 +54,14 @@ public class DistancePIDController {
     }
 
     private static void setMotors(int speed) {
-        leftMotor.setSpeed(speed);
-        rightMotor.setSpeed(speed);
         if (speed >= 0) {
+            leftMotor.setSpeed(speed);
+            rightMotor.setSpeed(speed);
             leftMotor.forward();
             rightMotor.forward();
         } else {
+            leftMotor.setSpeed(-speed);
+            rightMotor.setSpeed(-speed);
             leftMotor.backward();
             rightMotor.backward();
         }
