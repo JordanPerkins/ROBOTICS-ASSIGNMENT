@@ -3,14 +3,14 @@ import java.util.concurrent.TimeUnit;
 
 public class DistancePIDController {
 
-    private static Robot robot = new Robot();
-    private static Motor leftMotor = robot.getLargeMotor(Motor.Port.A);
-    private static Motor rightMotor = robot.getLargeMotor(Motor.Port.B);
-    private static UltrasonicSensor sensor = robot.getUltrasonicSensor(Sensor.Port.S1);
+    private static Robot robot = new Robot("dia-lego-c7");
+    private static Motor leftMotor = robot.getLargeMotor(Motor.Port.C);
+    private static Motor rightMotor = robot.getLargeMotor(Motor.Port.D);
+    private static UltrasonicSensor sensor = robot.getUltrasonicSensor(Sensor.Port.S2);
 
-    private static float Kp = 10;
-    private static float Ki = 1;
-    private static float Kd = 100;
+    private static float Kp = 1;
+    private static float Ki = 0;
+    private static float Kd = 0;
 
     private static void pid() {
         float target = 0.50f;
@@ -19,10 +19,12 @@ public class DistancePIDController {
         float derivative = 0;
         while (true) {
             float value = sensor.getDistance();
+            System.out.println(value);
             float error = value - target;
             integral = integral + error;
             derivative = error - lastError;
-            float signal = Kp*error + Ki*integral + Kd*derivative;
+            float signal = (Kp*error + Ki*integral + Kd*derivative)*100;
+            System.out.println(signal);
             setMotors((int) signal);
             lastError = error;
         }
@@ -68,7 +70,7 @@ public class DistancePIDController {
         integral = integral + error;
         derivative = error - lastError;
         float signal = Kp*error + Ki*integral + Kd*derivative;
-        setMotors(speed,(int) signal);
+        setMotorsTurn(speed,(int) signal);
         lastError = error;
       }
     }
@@ -109,5 +111,13 @@ public class DistancePIDController {
 
     public static void main(String[] args) {
         pid();
+
+        // Runtime.getRuntime().addShutdownHook(new Thread() {
+        //   public void run() {
+        //     leftMotor.stop();
+        //     rightMotor.stop();
+        //     robot.close();
+        //   }
+        // });
     }
 }
