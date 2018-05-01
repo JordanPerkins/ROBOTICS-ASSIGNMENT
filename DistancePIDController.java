@@ -6,7 +6,7 @@ public class DistancePIDController {
     private static Robot robot = new Robot("dia-lego-c7");
     private static Motor leftMotor = robot.getLargeMotor(Motor.Port.C);
     private static Motor rightMotor = robot.getLargeMotor(Motor.Port.D);
-    private static UltrasonicSensor sensor = robot.getUltrasonicSensor(Sensor.Port.S3);
+    private static UltrasonicSensor sensorR = robot.getUltrasonicSensor(Sensor.Port.S3);
 
     private static float Kp = 1;
     private static float Ki = 0;
@@ -18,7 +18,7 @@ public class DistancePIDController {
         float lastError = 0;
         float derivative = 0;
         while (true) {
-            float value = sensor.getDistance()*100;
+            float value = sensorR.getDistance()*100;
             System.out.println(value);
             float error = value - target;
             integral = integral + error;
@@ -50,7 +50,7 @@ public class DistancePIDController {
                     target = 50f;
                 }
             }
-            float value = sensor.getDistance()*100;
+            float value = sensorR.getDistance()*100;
             System.out.println(value);
             if (value > 125) {
               leftMotor.stop();
@@ -63,7 +63,6 @@ public class DistancePIDController {
                 Kp += 5;
                 System.out.println("Kp value is now" + Kp);
             }
-            float value = sensor.getDistance();
             float error = value - target;
             integral = integral + error;
             derivative = error - lastError;
@@ -81,7 +80,7 @@ public class DistancePIDController {
       float target = 20f;
       int speed = 50; // This is a guess to be changed.
       while (true) {
-        float value = sensor.getDistance()*100;
+        float value = sensorR.getDistance()*100;
         if (value > 125) {
           leftMotor.stop();
           rightMotor.stop();
@@ -112,8 +111,54 @@ public class DistancePIDController {
         }
     }
 
+    // private static UltrasonicSensor sensorL = robot.getUltrasonicSensor(Sensor.Port.S4);
+    // private static void pidMaze() {
+    //   float integral = 0;
+    //   float lastError = 0;
+    //   float derivative = 0;
+    //   float target = 20f;
+    //   int speed = 50; // To be altered
+    //   while (true) {
+    //     float valueR = sensorR.getDistance()*100;
+    //     float valueL = sensorL.getDistance()*100;
+    //
+    //     while (valueR > target+30) {
+    //       float value = sensorL.getDistance()*100;
+    //       float error = value - target;
+    //       integral = integral + error;
+    //       derivative = error - lastError;
+    //       float signal = Kp*error + Ki*integral + Kd*derivative;
+    //       System.out.println(speed+(-signal));
+    //       setMotorsTurn(speed,(int) signal);
+    //       lastError = error;
+    //       valueR = sensorR.getDistance()*100;
+    //     }
+    //
+    //     while (valueL > target+30) {
+    //       float value = sensorR.getDistance()*100;
+    //       float error = value - target;
+    //       integral = integral + error;
+    //       derivative = error - lastError;
+    //       float signal = Kp*error + Ki*integral + Kd*derivative;
+    //       setMotorsTurn(speed,(int) (-signal));
+    //       lastError = error;
+    //       valueL = sensorL.getDistance()*100;
+    //     }
+    //
+    //     float error = valueL-valueR;
+    //     integral = integral + error;
+    //     derivative = error - lastError;
+    //     float signal = Kp*error + Ki*integral + Kd*derivative;
+    //     System.out.println(speed+(-signal));
+    //     setMotorsTurn(speed,(int) signal);
+    //     lastError = error;
+    //     target = ((valueR+valueL)/2.0f);
+    //   }
+    // }
+
     private static void setMotorsTurn(int speed, int steer) {
       // Correct for following a right hand side wall.
+      // Think about altering this, I am still not 100% sure it is right.
       rightMotor.setSpeed(speed+steer);
       leftMotor.setSpeed(speed-steer);
       rightMotor.forward();
