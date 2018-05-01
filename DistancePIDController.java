@@ -36,9 +36,12 @@ public class DistancePIDController {
         float derivative = 0;
         float target = 50f;
         long initialTime = System.nanoTime();
+        long initialTime1 = System.nanoTime();
         while (true) {
             long timeChange = System.nanoTime() - initialTime;
             long timeChangeInSecs = TimeUnit.SECONDS.convert(timeChange, TimeUnit.NANOSECONDS);
+            long timeChange1 = System.nanoTime() - initialTime1;
+            long timeChangeInSecs1 = TimeUnit.SECONDS.convert(timeChange1, TimeUnit.NANOSECONDS);
             if (timeChangeInSecs >= 10.00) {
                 initialTime = System.nanoTime();
                 if (target == 50) {
@@ -55,6 +58,12 @@ public class DistancePIDController {
               robot.close();
               System.exit(0);
             }
+            if (timeChangeInSecs1 >= 30.00) {
+                initialTime1 = System.nanoTime();
+                Kp += 5;
+                System.out.println("Kp value is now" + Kp);
+            }
+            float value = sensor.getDistance();
             float error = value - target;
             integral = integral + error;
             derivative = error - lastError;
