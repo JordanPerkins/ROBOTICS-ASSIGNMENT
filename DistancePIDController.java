@@ -6,24 +6,24 @@ public class DistancePIDController {
     private static Robot robot = new Robot("dia-lego-c7");
     private static Motor leftMotor = robot.getLargeMotor(Motor.Port.C);
     private static Motor rightMotor = robot.getLargeMotor(Motor.Port.D);
-    private static UltrasonicSensor sensor = robot.getUltrasonicSensor(Sensor.Port.S2);
+    private static UltrasonicSensor sensor = robot.getUltrasonicSensor(Sensor.Port.S3);
 
     private static float Kp = 1;
     private static float Ki = 0;
     private static float Kd = 0;
 
     private static void pid() {
-        float target = 0.50f;
+        float target = 50f;
         float integral = 0;
         float lastError = 0;
         float derivative = 0;
         while (true) {
-            float value = sensor.getDistance();
+            float value = sensor.getDistance()*100;
             System.out.println(value);
             float error = value - target;
             integral = integral + error;
             derivative = error - lastError;
-            float signal = (Kp*error + Ki*integral + Kd*derivative)*100;
+            float signal = (Kp*error + Ki*integral + Kd*derivative);
             System.out.println(signal);
             setMotors((int) signal);
             lastError = error;
@@ -34,24 +34,31 @@ public class DistancePIDController {
         float integral = 0;
         float lastError = 0;
         float derivative = 0;
-        float target = 0.50f;
+        float target = 50f;
         long initialTime = System.nanoTime();
         while (true) {
             long timeChange = System.nanoTime() - initialTime;
             long timeChangeInSecs = TimeUnit.SECONDS.convert(timeChange, TimeUnit.NANOSECONDS);
             if (timeChangeInSecs >= 10.00) {
                 initialTime = System.nanoTime();
-                if (target == 0.50) {
-                    target = 0.30f;
+                if (target == 50) {
+                    target = 30f;
                 } else {
-                    target = 0.50f;
+                    target = 50f;
                 }
             }
-            float value = sensor.getDistance();
+            float value = sensor.getDistance()*100;
+            System.out.println(value);
+            if (value > 125) {
+              leftMotor.stop();
+              rightMotor.stop();
+              robot.close();
+              System.exit(0);
+            }
             float error = value - target;
             integral = integral + error;
             derivative = error - lastError;
-            float signal = Kp*error + Ki*integral + Kd*derivative;
+            float signal = (Kp*error + Ki*integral + Kd*derivative);
             setMotors((int) signal);
             lastError = error;
         }
@@ -62,14 +69,21 @@ public class DistancePIDController {
       float integral = 0;
       float lastError = 0;
       float derivative = 0;
-      float target = 0.20f;
-      int speed = 10; // This is a guess to be changed.
+      float target = 20f;
+      int speed = 50; // This is a guess to be changed.
       while (true) {
-        float value = sensor.getDistance();
+        float value = sensor.getDistance()*100;
+        if (value > 125) {
+          leftMotor.stop();
+          rightMotor.stop();
+          robot.close();
+          System.exit(0);
+        }
         float error = value - target;
         integral = integral + error;
         derivative = error - lastError;
         float signal = Kp*error + Ki*integral + Kd*derivative;
+        System.out.println(speed+(-signal));
         setMotorsTurn(speed,(int) signal);
         lastError = error;
       }
@@ -91,26 +105,14 @@ public class DistancePIDController {
 
     private static void setMotorsTurn(int speed, int steer) {
       // Correct for following a right hand side wall.
-      if (steer > 0) {
-        leftMotor.setSpeed(speed*steer);
-        rightMotor.setSpeed(speed*steer);
-        leftMotor.backward();
-        rightMotor.forward();
-      } else if (steer < 0) {
-        leftMotor.setSpeed(speed*(-steer));
-        rightMotor.setSpeed(speed*(-steer));
-        leftMotor.forward();
-        rightMotor.backward();
-      } else {
-        leftMotor.setSpeed(speed);
-        rightMotor.setSpeed(speed);
-        leftMotor.forward();
-        rightMotor.forward();
-      }
-    }
+      rightMotor.setSpeed(speed+steer);
+      leftMotor.setSpeed(speed-steer);
+      rightMotor.forward();
+      leftMotor.forward();
+  }
 
     public static void main(String[] args) {
-        pid();
+        pid3();
 
         // Runtime.getRuntime().addShutdownHook(new Thread() {
         //   public void run() {
