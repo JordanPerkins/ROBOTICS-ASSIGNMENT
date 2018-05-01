@@ -118,11 +118,12 @@ public class DistancePIDController {
     //   float derivative = 0;
     //   float target = 20f;
     //   int speed = 50; // To be altered
+    //   float errorDistance = 30f; // To be altered
     //   while (true) {
     //     float valueR = sensorR.getDistance()*100;
     //     float valueL = sensorL.getDistance()*100;
     //
-    //     while (valueR > target+30) {
+    //     while (valueR > target+errorDistance) {
     //       float value = sensorL.getDistance()*100;
     //       float error = value - target;
     //       integral = integral + error;
@@ -134,7 +135,7 @@ public class DistancePIDController {
     //       valueR = sensorR.getDistance()*100;
     //     }
     //
-    //     while (valueL > target+30) {
+    //     while (valueL > target+errorDistance) {
     //       float value = sensorR.getDistance()*100;
     //       float error = value - target;
     //       integral = integral + error;
