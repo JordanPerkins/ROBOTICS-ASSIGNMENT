@@ -142,36 +142,40 @@ public class DistancePIDController {
         System.out.println(valueR);
         System.out.println(valueL);
 
-        // while (valueR > target+errorDistance) {
-        //   checkClose();
-        //   float value = sensorL.getDistance()*100;
-        //   float error = value - target;
-        //   integral = integral + error;
-        //   derivative = error - lastError;
-        //   float signal = Kp*error + Ki*integral + Kd*derivative;
-        //   System.out.println(speed+(-signal));
-        //   setMotorsTurn(speed,(int) signal);
-        //   lastError = error;
-        //   valueR = sensorR.getDistance()*100;
-        // }
-        //
-        // while (valueL > target+errorDistance) {
-        //   checkClose();
-        //   float value = sensorR.getDistance()*100;
-        //   float error = value - target;
-        //   integral = integral + error;
-        //   derivative = error - lastError;
-        //   float signal = Kp*error + Ki*integral + Kd*derivative;
-        //   setMotorsTurn(speed,(int) (-signal));
-        //   lastError = error;
-        //   valueL = sensorL.getDistance()*100;
-        // }
+        while (valueR > target+errorDistance) {
+          System.out.print("Right Error");
+          checkClose();
+          float value = sensorL.getDistance()*100;
+          float error = value - target;
+          if (value > 60) {
+            error = lastError;
+          }
+          integral = integral + error;
+          derivative = error - lastError;
+          float signal = Kp*error + Ki*integral + Kd*derivative;
+          setMotorsTurn(speed,(int) signal);
+          lastError = error;
+          valueR = sensorR.getDistance()*100;
+        }
+
+        while (valueL > target+errorDistance) {
+          System.out.print("Left Error");
+          checkClose();
+          float value = sensorR.getDistance()*100;
+          float error = value - target;
+          if (value > 60) {
+            System.out.println("error");
+            error = lastError;
+          }
+          integral = integral + error;
+          derivative = error - lastError;
+          float signal = Kp*error + Ki*integral + Kd*derivative;
+          setMotorsTurn(speed,(int) (-signal));
+          lastError = error;
+          valueL = sensorL.getDistance()*100;
+        }
 
         float error = valueL-valueR;
-        if (valueR > 60 || valueL > 60) {
-          System.out.println("error");
-          error = lastError;
-        }
         integral = integral + error;
         derivative = error - lastError;
         float signal = Kp*error + Ki*integral + Kd*derivative;
