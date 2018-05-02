@@ -3,14 +3,14 @@ import java.util.concurrent.TimeUnit;
 
 public class DistancePIDController {
 
-    private static Robot robot = new Robot("dia-lego-c7");
+    private static Robot robot = new Robot("dia-lego-e2");
     private static Motor leftMotor = robot.getLargeMotor(Motor.Port.C);
     private static Motor rightMotor = robot.getLargeMotor(Motor.Port.D);
     private static UltrasonicSensor sensorR = robot.getUltrasonicSensor(Sensor.Port.S1);
     private static TouchSensor touch = robot.getTouchSensor(Sensor.Port.S4);
     private static UltrasonicSensor sensorL = robot.getUltrasonicSensor(Sensor.Port.S2);
 
-    private static float Kp = 1f;
+    private static float Kp = 2f;
     private static float Ki = 0;
     private static float Kd = 0;
 
@@ -132,21 +132,24 @@ public class DistancePIDController {
       float lastError = 0;
       float derivative = 0;
       float target = 100f;
+      float previousL = 100f;
+      float previousR = 100f;
       int speed = 75; // To be altered
-      float errorDistance = 10f; // To be altered
+      float errorDistance = 20f; // To be altered
       while (true) {
         checkClose();
         float valueR = sensorR.getDistance()*100;
         float valueL = sensorL.getDistance()*100;
-        System.out.println("-------------------------------------------------");
-        System.out.println(valueR);
-        System.out.println(valueL);
 
-        while (valueR > target+errorDistance) {
-          System.out.print("Right Error");
+        while (valueR > previousR+errorDistance) {
+          System.out.print("Right Error\n");
           checkClose();
           float value = sensorL.getDistance()*100;
           float error = value - target;
+          if (value > previousL+errorDistance) {
+            System.out.println("Break right"+value);
+            break;
+          }
           if (value > 60) {
             error = lastError;
           }
@@ -158,11 +161,15 @@ public class DistancePIDController {
           valueR = sensorR.getDistance()*100;
         }
 
-        while (valueL > target+errorDistance) {
-          System.out.print("Left Error");
+        while (valueL > previousL+errorDistance) {
+          System.out.print("Left Error\n");
           checkClose();
           float value = sensorR.getDistance()*100;
           float error = value - target;
+          if (value > previousR+errorDistance) {
+            System.out.println("Break left"+value);
+            break;
+          }
           if (value > 60) {
             System.out.println("error");
             error = lastError;
@@ -173,6 +180,9 @@ public class DistancePIDController {
           setMotorsTurn(speed,(int) (-signal));
           lastError = error;
           valueL = sensorL.getDistance()*100;
+          System.out.println("-------------------------");
+          System.out.println("Distance Left"+valueL);
+          System.out.println("Error Distance"+errorDistance);
         }
 
         float error = valueL-valueR;
@@ -183,12 +193,15 @@ public class DistancePIDController {
         setMotorsTurn(speed,(int) signal);
         lastError = error;
         target = ((valueR+valueL)/2.0f);
+        previousL = valueL;
+        previousR = valueR;
       }
     }
 
     private static void setMotorsTurn(int speed, int steer) {
       int rightSpeed = speed+steer;
       int leftSpeed = speed-steer;
+      System.out.println("Right speed "+rightSpeed+"Left speed "+leftSpeed);
       if (rightSpeed < 0) {
         rightMotor.setSpeed(-rightSpeed);
         leftMotor.setSpeed(leftSpeed);
