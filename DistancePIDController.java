@@ -3,14 +3,14 @@ import java.util.concurrent.TimeUnit;
 
 public class DistancePIDController {
 
-    private static Robot robot = new Robot("dia-lego-e2");
+    private static Robot robot = new Robot("dia-lego-c7");
     private static Motor leftMotor = robot.getLargeMotor(Motor.Port.C);
     private static Motor rightMotor = robot.getLargeMotor(Motor.Port.D);
     private static UltrasonicSensor sensorR = robot.getUltrasonicSensor(Sensor.Port.S1);
     private static TouchSensor touch = robot.getTouchSensor(Sensor.Port.S4);
     private static UltrasonicSensor sensorL = robot.getUltrasonicSensor(Sensor.Port.S2);
 
-    private static float Kp = 2f;
+    private static float Kp = 3f; // 2f
     private static float Ki = 0;
     private static float Kd = 0;
 
@@ -134,12 +134,19 @@ public class DistancePIDController {
       float target = 100f;
       float previousL = 100f;
       float previousR = 100f;
-      int speed = 75; // To be altered
-      float errorDistance = 20f; // To be altered
+      int speed = 300; // T
+      float errorDistance = 15f; // To be altered
       while (true) {
         checkClose();
         float valueR = sensorR.getDistance()*100;
+        System.out.println("ValueR: " + valueR);
         float valueL = sensorL.getDistance()*100;
+        System.out.println("ValueL: " + valueL);
+        if (valueL > 100 || valueR > 100) {
+            System.out.println("con.......");
+            continue;
+        }
+
 
         while (valueR > previousR+errorDistance) {
           System.out.print("Right Error\n");
@@ -159,6 +166,9 @@ public class DistancePIDController {
           setMotorsTurn(speed,(int) signal);
           lastError = error;
           valueR = sensorR.getDistance()*100;
+            System.out.println("-------------------------");
+            System.out.println("Distance Left"+valueR);
+            System.out.println("Error Distance"+errorDistance);
         }
 
         while (valueL > previousL+errorDistance) {
@@ -189,7 +199,6 @@ public class DistancePIDController {
         integral = integral + error;
         derivative = error - lastError;
         float signal = Kp*error + Ki*integral + Kd*derivative;
-        System.out.println(signal);
         setMotorsTurn(speed,(int) signal);
         lastError = error;
         target = ((valueR+valueL)/2.0f);
@@ -201,7 +210,7 @@ public class DistancePIDController {
     private static void setMotorsTurn(int speed, int steer) {
       int rightSpeed = speed+steer;
       int leftSpeed = speed-steer;
-      System.out.println("Right speed "+rightSpeed+"Left speed "+leftSpeed);
+      System.out.println("Signal " + steer + " Right speed "+rightSpeed+" Left speed "+leftSpeed);
       if (rightSpeed < 0) {
         rightMotor.setSpeed(-rightSpeed);
         leftMotor.setSpeed(leftSpeed);
